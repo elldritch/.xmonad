@@ -46,8 +46,9 @@ import XMonad.Operations (kill, restart, sendMessage, windows)
 import XMonad.StackSet (greedyView, shift)
 
 import Sound.Pulse.DBus (PulseAudioT)
+import Sound.Pulse.DBus.Card (CardProfile (..), getDefaultSinkCardProfiles, setDefaultSinkCardProfile)
 import Sound.Pulse.DBus.Server (runPulseAudioTSession)
-import Sound.Pulse.DBus.Sink (Sink (..), getSinks, setDefaultSink)
+import Sound.Pulse.DBus.Sink (Sink (..), getSinks, setDefaultSink, sinkPrettyName)
 import XMWM.Debug (debug)
 import XMWM.Prompt (dmenu')
 import XMWM.Workspaces (defaultWorkspaces, workspaceFromDmenu)
@@ -204,9 +205,10 @@ audioDeviceBindings =
   concat
     [ -- Select default source
       -- Select default sink
-      withSMask' xK_F10 $ selectDefaultSink
-      -- Select profile for default source card
+      withSMask' xK_F10 selectDefaultSink
+    , -- Select profile for default source card
       -- Select profile for default sink card
+      withSMask' xK_F12 selectDefaultSinkCardProfile
     ]
   where
     runPA :: (MonadIO m) => PulseAudioT IO () -> m ()
@@ -219,8 +221,25 @@ audioDeviceBindings =
     selectDefaultSink :: (MonadIO m) => m ()
     selectDefaultSink = runPA $ do
       sinks <- getSinks
-      selected <- dmenu' sinkName sinks
+      selected <- dmenu' (toString . sinkPrettyName) sinks
       maybe (pure ()) (setDefaultSink . sinkID) selected
-      where
-        sinkName :: Sink -> String
-        sinkName Sink{name, description} = toString $ fromMaybe name description
+
+    -- Why does this cause the default sink itself to change when the profile is
+    -- set to something strange?
+    --
+    -- For example, when I set my Built-in Audio to use Digital Output, the
+    -- default sink automatically switches? This appears to happen using
+    -- pavucontrol too, and pactl reports that the default sink is actually
+    -- changing (as opposed to the sink-inputs just moving or not being heard).
+    --
+    -- Okay, some testing with `pactl info` and `pavucontrol`:
+    --
+    -- - Nonsensical card profile changes cause the default sink to change
+    -- - Nonsensical card profile changes do NOT cause streams to move - if you
+    --   change the profile back, sound plays again even if the default sink is
+    --   still the changed sink.
+    selectDefaultSinkCardProfile :: (MonadIO m) => m ()
+    selectDefaultSinkCardProfile = runPA $ do
+      profiles <- getDefaultSinkCardProfiles
+      selected <- dmenu' (\CardProfile{description} -> toString description) profiles
+      maybe (pure ()) (setDefaultSinkCardProfile . profileID) selected

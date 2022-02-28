@@ -3,11 +3,13 @@ module Sound.Pulse.DBus.Sink (
   SinkID,
   getSinks,
   setDefaultSink,
+  sinkPrettyName,
 ) where
 
 import Relude
 
 import DBus (ObjectPath, Variant, toVariant)
+import Data.Text (stripEnd, stripSuffix)
 
 import Sound.Pulse.DBus (PulseAudioT)
 import Sound.Pulse.DBus.Interfaces (
@@ -32,11 +34,18 @@ import Sound.Pulse.DBus.Internal (
 data Sink = Sink
   { sinkID :: SinkID
   , name :: Text
+  , profileDescription :: Maybe Text
   , description :: Maybe Text
   }
   deriving (Show)
 
 type SinkID = ObjectPath
+
+sinkPrettyName :: Sink -> Text
+sinkPrettyName Sink{name, profileDescription, description} = fromMaybe name $ do
+  desc <- description
+  profDesc <- profileDescription
+  stripEnd <$> stripSuffix profDesc desc
 
 getSinks :: (MonadIO m) => PulseAudioT m [Sink]
 getSinks = do
@@ -46,7 +55,8 @@ getSinks = do
     name :: Text <- fromVariantMap "Name" sinkMap
     propsList :: Map Text ByteString <- fromVariantMap "PropertyList" sinkMap
     description <- fromPropList "device.description" propsList
-    pure Sink{sinkID, name, description}
+    profileDescription <- fromPropList "device.profile.description" propsList
+    pure Sink{sinkID, name, description, profileDescription}
 
 setDefaultSink :: (MonadIO m) => SinkID -> PulseAudioT m ()
 setDefaultSink sinkID = do
