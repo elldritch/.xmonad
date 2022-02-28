@@ -4,18 +4,23 @@ module Sound.Pulse.DBus.Interfaces (
   coreInterface,
   coreSinksProperty,
   coreDefaultSinkProperty,
+  coreDefaultSourceProperty,
   corePlaybackStreamsProperty,
+
   -- * Card
   cardInterface,
   cardProfilesProperty,
   cardActiveProfileProperty,
+
   -- * Card Profile
   cardProfileInterface,
   cardProfileNameProperty,
   cardProfileDescriptionProperty,
+
   -- * Device (source, sink)
   deviceInterface,
   deviceCardProperty,
+
   -- * Stream (source-output, sink-input)
   streamInterface,
   streamMoveMethod,
@@ -36,6 +41,9 @@ coreSinksProperty = "Sinks"
 
 coreDefaultSinkProperty :: MemberName
 coreDefaultSinkProperty = "FallbackSink"
+
+coreDefaultSourceProperty :: MemberName
+coreDefaultSourceProperty = "FallbackSource"
 
 corePlaybackStreamsProperty :: MemberName
 corePlaybackStreamsProperty = "PlaybackStreams"

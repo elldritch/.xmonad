@@ -46,7 +46,13 @@ import XMonad.Operations (kill, restart, sendMessage, windows)
 import XMonad.StackSet (greedyView, shift)
 
 import Sound.Pulse.DBus (PulseAudioT)
-import Sound.Pulse.DBus.Card (CardProfile (..), getDefaultSinkCardProfiles, setDefaultSinkCardProfile)
+import Sound.Pulse.DBus.Card (
+  CardProfile (..),
+  getDefaultSinkCardProfiles,
+  getDefaultSourceCardProfiles,
+  setDefaultSinkCardProfile,
+  setDefaultSourceCardProfile,
+ )
 import Sound.Pulse.DBus.Server (runPulseAudioTSession)
 import Sound.Pulse.DBus.Sink (Sink (..), getSinks, setDefaultSink, sinkPrettyName)
 import XMWM.Debug (debug)
@@ -207,7 +213,8 @@ audioDeviceBindings =
       -- Select default sink
       withSMask' xK_F10 selectDefaultSink
     , -- Select profile for default source card
-      -- Select profile for default sink card
+      withSMask' xK_F11 selectDefaultSourceCardProfile
+    , -- Select profile for default sink card
       withSMask' xK_F12 selectDefaultSinkCardProfile
     ]
   where
@@ -243,3 +250,9 @@ audioDeviceBindings =
       profiles <- getDefaultSinkCardProfiles
       selected <- dmenu' (\CardProfile{description} -> toString description) profiles
       maybe (pure ()) (setDefaultSinkCardProfile . profileID) selected
+
+    selectDefaultSourceCardProfile :: (MonadIO m) => m ()
+    selectDefaultSourceCardProfile = runPA $ do
+      profiles <- getDefaultSourceCardProfiles
+      selected <- dmenu' (\CardProfile{description} -> toString description) profiles
+      maybe (pure ()) (setDefaultSourceCardProfile . profileID) selected

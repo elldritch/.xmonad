@@ -66,5 +66,5 @@ setDefaultSink sinkID = do
 movePlaybackStreamsTo :: (MonadIO m) => SinkID -> PulseAudioT m ()
 movePlaybackStreamsTo sinkID = do
   pbStreamPaths :: [ObjectPath] <- getProperty coreObject coreInterface corePlaybackStreamsProperty
-  forM_ pbStreamPaths $ \pbStreamPath -> do
+  forM_ pbStreamPaths $ \pbStreamPath ->
     call pbStreamPath streamInterface streamMoveMethod [toVariant sinkID]
