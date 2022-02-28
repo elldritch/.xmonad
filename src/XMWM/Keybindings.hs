@@ -3,10 +3,8 @@ module XMWM.Keybindings (keybindings, superMask) where
 
 import Relude
 
-import DBus (ObjectPath)
 import Data.Bits ((.|.))
 import Data.Default (def)
-import Data.Map.Lazy qualified as Map
 import Graphics.X11.ExtraTypes.XF86 (
   xF86XK_AudioLowerVolume,
   xF86XK_AudioMicMute,
@@ -51,7 +49,7 @@ import Sound.Pulse.DBus (PulseAudioT)
 import Sound.Pulse.DBus.Server (runPulseAudioTSession)
 import Sound.Pulse.DBus.Sink (Sink (..), getSinks, setDefaultSink)
 import XMWM.Debug (debug)
-import XMWM.Prompt (dmenu)
+import XMWM.Prompt (dmenu')
 import XMWM.Workspaces (defaultWorkspaces, workspaceFromDmenu)
 
 -- Masks
@@ -221,14 +219,8 @@ audioDeviceBindings =
     selectDefaultSink :: (MonadIO m) => m ()
     selectDefaultSink = runPA $ do
       sinks <- getSinks
-      let nameToID = mapNameToID sinks
-      selected <- toText <<$>> dmenu (sinkName <$> sinks)
-      case selected >>= (`Map.lookup` nameToID) of
-        Just sinkID -> setDefaultSink sinkID
-        Nothing -> pure ()
+      selected <- dmenu' sinkName sinks
+      maybe (pure ()) (setDefaultSink . sinkID) selected
       where
-        sinkName :: Sink -> Text
-        sinkName Sink{name, description} = fromMaybe name description
-
-        mapNameToID :: [Sink] -> Map Text ObjectPath
-        mapNameToID sinks = Map.fromList $ (\s@Sink{sinkID} -> (sinkName s, sinkID)) <$> sinks
+        sinkName :: Sink -> String
+        sinkName Sink{name, description} = toString $ fromMaybe name description
