@@ -17,7 +17,7 @@ import Graphics.X11.Xlib (
  )
 import XMonad.Core (WorkspaceId, X, withWindowSet)
 import XMonad.StackSet (Workspace (tag), workspaces)
-import XMonad.Util.Dmenu (dmenu)
+import XMWM.Prompt (dmenu)
 
 -- | A static list of default workspaces to choose from. This is every key
 -- across the top row, from tilde to backspace.
@@ -35,7 +35,6 @@ workspaceFromDmenu = do
   currentWorkspaces <- withWindowSet (pure . workspaces)
   let currentWorkspaceNames = tag <$> currentWorkspaces
   let customWorkspaceNames = sort $ filter (`Set.notMember` defaultWorkspacesSet) currentWorkspaceNames
-  selected <- dmenu $ (snd <$> defaultWorkspaces) ++ customWorkspaceNames
-  pure $ if null selected then Nothing else Just selected
+  dmenu $ (snd <$> defaultWorkspaces) ++ customWorkspaceNames
   where
     defaultWorkspacesSet = Set.fromList $ snd <$> defaultWorkspaces

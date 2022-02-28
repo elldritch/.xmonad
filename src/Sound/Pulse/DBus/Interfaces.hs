@@ -1,17 +1,22 @@
 module Sound.Pulse.DBus.Interfaces (
+  -- * Core
   coreObject,
   coreInterface,
   coreSinksProperty,
   coreDefaultSinkProperty,
   corePlaybackStreamsProperty,
+  -- * Card
   cardInterface,
   cardProfilesProperty,
   cardActiveProfileProperty,
+  -- * Card Profile
   cardProfileInterface,
   cardProfileNameProperty,
   cardProfileDescriptionProperty,
+  -- * Device (source, sink)
   deviceInterface,
   deviceCardProperty,
+  -- * Stream (source-output, sink-input)
   streamInterface,
   streamMoveMethod,
 ) where

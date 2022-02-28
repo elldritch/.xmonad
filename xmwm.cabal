@@ -89,6 +89,7 @@ library
     XMWM.Config
     XMWM.Debug
     XMWM.Keybindings
+    XMWM.Prompt
     XMWM.Spawn
     XMWM.Workspaces
     XMWM.XMobar
@@ -102,6 +103,7 @@ library
     , X11              ^>=1.10.2
     , xmonad           ^>=0.17
     , xmonad-contrib   ^>=0.17
+    , data-default ^>=0.7.1.1
 
 test-suite tests
   import:             lang

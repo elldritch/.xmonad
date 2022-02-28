@@ -6,7 +6,7 @@ module XMWM.Config (xConf) where
 
 import Relude
 
-import XMonad.Config (def)
+import Data.Default (def)
 import XMonad.Core (XConfig (..))
 import XMonad.Hooks.ManageDocks (avoidStruts, manageDocks)
 import XMonad.Hooks.Place (placeHook, simpleSmart)

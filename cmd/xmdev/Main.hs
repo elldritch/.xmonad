@@ -7,12 +7,12 @@ import Relude
 import DBus (ObjectPath)
 import Data.Map.Lazy qualified as Map
 import Relude.Unsafe (fromJust)
-import XMonad.Util.Dmenu (dmenu)
 
 import Sound.Pulse.DBus (PulseAudioT, runPulseAudioT)
 import Sound.Pulse.DBus.Card (getDefaultSinkCardProfiles)
 import Sound.Pulse.DBus.Server (getPulseAudioServerAddress)
 import Sound.Pulse.DBus.Sink (Sink (..), getSinks, setDefaultSink)
+import XMWM.Prompt (dmenu)
 
 main :: IO ()
 main = do
@@ -25,7 +25,7 @@ testPickSink :: (MonadIO m) => PulseAudioT m ()
 testPickSink = do
   sinks <- getSinks
   let nameToID = mapNameToID sinks
-  selected <- toText <$> dmenu (toString . sinkName <$> sinks)
+  selected <- toText . fromJust <$> dmenu (toString . sinkName <$> sinks)
   print selected
   let sinkID = fromJust $ Map.lookup selected nameToID
   print sinkID
