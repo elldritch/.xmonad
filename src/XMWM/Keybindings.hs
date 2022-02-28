@@ -53,7 +53,14 @@ import Sound.Pulse.DBus.Card (
   setDefaultSinkCardProfile,
   setDefaultSourceCardProfile,
  )
-import Sound.Pulse.DBus.Device (deviceID, devicePrettyName, getSinks, getSources, setDefaultSink, setDefaultSource)
+import Sound.Pulse.DBus.Device (
+  deviceID,
+  devicePrettyName,
+  getSinks,
+  getSources,
+  setDefaultSink,
+  setDefaultSource,
+ )
 import Sound.Pulse.DBus.Server (runPulseAudioTSession)
 import XMWM.Debug (debug)
 import XMWM.Prompt (dmenu')
@@ -226,17 +233,24 @@ audioDeviceBindings =
         Right () -> pure ()
         Left err -> debug $ "Could not select default sink: " <> err
 
+    selectOption ::
+      (MonadIO m, ToString s) =>
+      PulseAudioT m [a] ->
+      (a -> s) ->
+      (a -> PulseAudioT m ()) ->
+      PulseAudioT m ()
+    selectOption options render setOption = do
+      opts <- options
+      selected <- dmenu' (toString . render) opts
+      maybe (pure ()) setOption selected
+
     selectDefaultSink :: (MonadIO m) => m ()
-    selectDefaultSink = runPA $ do
-      sinks <- getSinks
-      selected <- dmenu' (toString . devicePrettyName) sinks
-      maybe (pure ()) (setDefaultSink . deviceID) selected
+    selectDefaultSink =
+      runPA $ selectOption getSinks devicePrettyName (setDefaultSink . deviceID)
 
     selectDefaultSource :: (MonadIO m) => m ()
-    selectDefaultSource = runPA $ do
-      sources <- getSources
-      selected <- dmenu' (toString . devicePrettyName) sources
-      maybe (pure ()) (setDefaultSource . deviceID) selected
+    selectDefaultSource =
+      runPA $ selectOption getSources devicePrettyName (setDefaultSource . deviceID)
 
     -- Why does this cause the default sink itself to change when the profile is
     -- set to something strange?
@@ -253,13 +267,9 @@ audioDeviceBindings =
     --   change the profile back, sound plays again even if the default sink is
     --   still the changed sink.
     selectDefaultSinkCardProfile :: (MonadIO m) => m ()
-    selectDefaultSinkCardProfile = runPA $ do
-      profiles <- getDefaultSinkCardProfiles
-      selected <- dmenu' (\CardProfile{description} -> toString description) profiles
-      maybe (pure ()) (setDefaultSinkCardProfile . profileID) selected
+    selectDefaultSinkCardProfile =
+      runPA $ selectOption getDefaultSinkCardProfiles description (setDefaultSinkCardProfile . profileID)
 
     selectDefaultSourceCardProfile :: (MonadIO m) => m ()
-    selectDefaultSourceCardProfile = runPA $ do
-      profiles <- getDefaultSourceCardProfiles
-      selected <- dmenu' (\CardProfile{description} -> toString description) profiles
-      maybe (pure ()) (setDefaultSourceCardProfile . profileID) selected
+    selectDefaultSourceCardProfile =
+      runPA $ selectOption getDefaultSourceCardProfiles description (setDefaultSourceCardProfile . profileID)

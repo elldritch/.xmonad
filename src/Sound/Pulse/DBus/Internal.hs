@@ -45,7 +45,7 @@ fromVariantMap k m =
         (Map.lookup k m)
 
 -- | Get a possibly missing value from a Variant dictionary.
-fromVariantMap' :: (Monad m, Ord k, Show k, IsVariant v) => k -> Map k Variant -> PulseAudioT m (Maybe v)
+fromVariantMap' :: (Monad m, Ord k, IsVariant v) => k -> Map k Variant -> PulseAudioT m (Maybe v)
 fromVariantMap' k m = do
   case Map.lookup k m of
     Just v -> Just <$> liftEither (fromVariant' v)

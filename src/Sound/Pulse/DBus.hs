@@ -1,12 +1,14 @@
 -- |
 -- Docs:
+-- https://gavv.github.io/articles/pulseaudio-under-the-hood/#d-bus-api
+--
+-- https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/Developer/Clients/DBus/ConnectingToServer/
+-- https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/Developer/Clients/DBus/
 --
 -- https://dbus.freedesktop.org/doc/dbus-tutorial.html
--- https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/Developer/Clients/DBus/ConnectingToServer/
--- https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/Developer/Clients/DBus/#devicessinksandsources
+-- https://dbus.freedesktop.org/doc/dbus-specification.html
 -- https://stackoverflow.com/questions/48648952/set-get-property-using-dbus-send
--- https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-properties
--- https://gavv.github.io/articles/pulseaudio-under-the-hood/#d-bus-api
+--
 module Sound.Pulse.DBus (
   PulseAudioT,
   runPulseAudioT,

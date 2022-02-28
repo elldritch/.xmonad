@@ -48,12 +48,6 @@ data Device = Device
 
 type DeviceID = ObjectPath
 
-data Source = Source
-  { device :: Device
-  , monitorOf :: Maybe ObjectPath
-  }
-  deriving (Show)
-
 devicePrettyName :: Device -> Text
 devicePrettyName Device{name, profileDescription, description} = fromMaybe name $ do
   desc <- description
