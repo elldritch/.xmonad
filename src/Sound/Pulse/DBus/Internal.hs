@@ -1,6 +1,7 @@
 module Sound.Pulse.DBus.Internal (
   fromVariant',
   fromVariantMap,
+  fromVariantMap',
   fromPropList,
   call,
   getProperty,
@@ -42,6 +43,13 @@ fromVariantMap k m =
       =<< maybeToRight
         ("fromVariantMap: no key " <> show k)
         (Map.lookup k m)
+
+-- | Get a possibly missing value from a Variant dictionary.
+fromVariantMap' :: (Monad m, Ord k, Show k, IsVariant v) => k -> Map k Variant -> PulseAudioT m (Maybe v)
+fromVariantMap' k m = do
+  case Map.lookup k m of
+    Just v -> Just <$> liftEither (fromVariant' v)
+    Nothing -> pure Nothing
 
 -- | Get a value from a PulseAudio property list.
 --

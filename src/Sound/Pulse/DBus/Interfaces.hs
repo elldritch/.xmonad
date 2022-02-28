@@ -3,9 +3,11 @@ module Sound.Pulse.DBus.Interfaces (
   coreObject,
   coreInterface,
   coreSinksProperty,
+  coreSourcesProperty,
   coreDefaultSinkProperty,
   coreDefaultSourceProperty,
   corePlaybackStreamsProperty,
+  coreRecordStreamsProperty,
 
   -- * Card
   cardInterface,
@@ -39,6 +41,9 @@ coreInterface = "org.PulseAudio.Core1"
 coreSinksProperty :: MemberName
 coreSinksProperty = "Sinks"
 
+coreSourcesProperty :: MemberName
+coreSourcesProperty = "Sources"
+
 coreDefaultSinkProperty :: MemberName
 coreDefaultSinkProperty = "FallbackSink"
 
@@ -47,6 +52,9 @@ coreDefaultSourceProperty = "FallbackSource"
 
 corePlaybackStreamsProperty :: MemberName
 corePlaybackStreamsProperty = "PlaybackStreams"
+
+coreRecordStreamsProperty :: MemberName
+coreRecordStreamsProperty = "RecordStreams"
 
 -- Card
 

@@ -81,11 +81,10 @@ library
   exposed-modules:
     Sound.Pulse.DBus
     Sound.Pulse.DBus.Card
+    Sound.Pulse.DBus.Device
     Sound.Pulse.DBus.Interfaces
     Sound.Pulse.DBus.Internal
     Sound.Pulse.DBus.Server
-    Sound.Pulse.DBus.Sink
-    Sound.Pulse.DBus.Source
     XMWM.Config
     XMWM.Debug
     XMWM.Keybindings
@@ -95,6 +94,7 @@ library
     XMWM.XMobar
 
   build-depends:
+    , data-default     ^>=0.7.1.1
     , dbus             ^>=1.2.22
     , monad-control    ^>=1.0.3.1
     , mtl              ^>=2.2.2
@@ -102,7 +102,6 @@ library
     , X11              ^>=1.10.2
     , xmonad           ^>=0.17
     , xmonad-contrib   ^>=0.17
-    , data-default ^>=0.7.1.1
 
 test-suite tests
   import:             lang
@@ -114,7 +113,7 @@ test-suite tests
   other-modules:
   build-tool-depends: hspec-discover:hspec-discover ^>=2.9.4
   build-depends:
-    , hspec           ^>=2.9.4
+    , hspec  ^>=2.9.4
     , xmwm
 
 executable xmonad
@@ -134,13 +133,3 @@ executable xmobar
     , directory  ^>=1.3.6.0
     , process    ^>=1.6.13.2
     , xmobar     ^>=0.39
-
-executable xmdev
-  import:         lang
-  hs-source-dirs: cmd/xmdev
-  main-is:        Main.hs
-  build-depends:
-    , dbus            ^>=1.2.22
-    , monad-control   ^>=1.0.3.1
-    , xmonad-contrib  ^>=0.17
-    , xmwm

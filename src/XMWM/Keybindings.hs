@@ -53,8 +53,8 @@ import Sound.Pulse.DBus.Card (
   setDefaultSinkCardProfile,
   setDefaultSourceCardProfile,
  )
+import Sound.Pulse.DBus.Device (deviceID, devicePrettyName, getSinks, getSources, setDefaultSink, setDefaultSource)
 import Sound.Pulse.DBus.Server (runPulseAudioTSession)
-import Sound.Pulse.DBus.Sink (Sink (..), getSinks, setDefaultSink, sinkPrettyName)
 import XMWM.Debug (debug)
 import XMWM.Prompt (dmenu')
 import XMWM.Workspaces (defaultWorkspaces, workspaceFromDmenu)
@@ -212,7 +212,8 @@ audioDeviceBindings =
     [ -- Select default sink
       withSMask' xK_F9 selectDefaultSink
     , -- Select default source
-      -- Select profile for default sink card
+      withSMask' xK_F10 selectDefaultSource
+    , -- Select profile for default sink card
       withSMask' xK_F11 selectDefaultSinkCardProfile
     , -- Select profile for default source card
       withSMask' xK_F12 selectDefaultSourceCardProfile
@@ -228,8 +229,14 @@ audioDeviceBindings =
     selectDefaultSink :: (MonadIO m) => m ()
     selectDefaultSink = runPA $ do
       sinks <- getSinks
-      selected <- dmenu' (toString . sinkPrettyName) sinks
-      maybe (pure ()) (setDefaultSink . sinkID) selected
+      selected <- dmenu' (toString . devicePrettyName) sinks
+      maybe (pure ()) (setDefaultSink . deviceID) selected
+
+    selectDefaultSource :: (MonadIO m) => m ()
+    selectDefaultSource = runPA $ do
+      sources <- getSources
+      selected <- dmenu' (toString . devicePrettyName) sources
+      maybe (pure ()) (setDefaultSource . deviceID) selected
 
     -- Why does this cause the default sink itself to change when the profile is
     -- set to something strange?
