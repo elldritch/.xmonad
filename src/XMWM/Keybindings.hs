@@ -3,8 +3,10 @@ module XMWM.Keybindings (keybindings, superMask) where
 
 import Relude
 
+import DBus (ObjectPath)
 import Data.Bits ((.|.))
 import Data.Default (def)
+import Data.Map.Lazy qualified as Map
 import Graphics.X11.ExtraTypes.XF86 (
   xF86XK_AudioLowerVolume,
   xF86XK_AudioMicMute,
@@ -20,6 +22,7 @@ import Graphics.X11.Xlib (
   mod4Mask,
   noModMask,
   shiftMask,
+  xK_Delete,
   xK_F10,
   xK_F11,
   xK_F12,
@@ -37,13 +40,19 @@ import Graphics.X11.Xlib (
   xK_v,
   xK_w,
  )
-import XMWM.Workspaces (defaultWorkspaces, workspaceFromDmenu)
-import XMonad.Actions.DynamicWorkspaces (addHiddenWorkspace, addWorkspace)
+import XMonad.Actions.DynamicWorkspaces (addHiddenWorkspace, addWorkspace, removeEmptyWorkspace)
 import XMonad.Actions.PhysicalScreens (sendToScreen, viewScreen)
 import XMonad.Core (X, getDirectories, recompile, spawn)
 import XMonad.Hooks.ManageDocks (ToggleStruts (..))
 import XMonad.Operations (kill, restart, sendMessage, windows)
 import XMonad.StackSet (greedyView, shift)
+
+import Sound.Pulse.DBus (PulseAudioT)
+import Sound.Pulse.DBus.Server (runPulseAudioTSession)
+import Sound.Pulse.DBus.Sink (Sink (..), getSinks, setDefaultSink)
+import XMWM.Debug (debug)
+import XMWM.Prompt (dmenu)
+import XMWM.Workspaces (defaultWorkspaces, workspaceFromDmenu)
 
 -- Masks
 
@@ -52,8 +61,8 @@ superMask :: KeyMask
 superMask = mod4Mask
 
 -- | The left alt key.
-leftAltMask :: KeyMask
-leftAltMask = mod1Mask
+_leftAltMask :: KeyMask
+_leftAltMask = mod1Mask
 
 -- | The right alt key. For this to work, you need a custom @xmodmap@. See also:
 --
@@ -118,18 +127,11 @@ coreBindings :: [Keybinding]
 coreBindings =
   concat
     [ -- Dynamic workspaces
-      withMask' xK_backslash $ do
-        selected <- workspaceFromDmenu
-        case selected of
-          Just ws -> addWorkspace ws
-          Nothing -> pure ()
-    , withSMask' xK_backslash $ do
-        selected <- workspaceFromDmenu
-        case selected of
-          Just ws -> do
-            addHiddenWorkspace ws
-            windows $ shift ws
-          Nothing -> pure ()
+      withMask' xK_backslash $
+        workspaceFromDmenu >>= maybe (pure ()) addWorkspace
+    , withSMask' xK_backslash $
+        workspaceFromDmenu >>= maybe (pure ()) (addHiddenWorkspace >> windows . shift)
+    , withMask' xK_Delete removeEmptyWorkspace
     , -- Recompile and reload XMonad
       withMask' xK_r $ do
         dirs <- liftIO getDirectories
@@ -200,4 +202,33 @@ volumeBindings =
     ]
 
 audioDeviceBindings :: [Keybinding]
-audioDeviceBindings = []
+audioDeviceBindings =
+  concat
+    [ -- Select default source
+      -- Select default sink
+      withSMask' xK_F10 $ selectDefaultSink
+      -- Select profile for default source card
+      -- Select profile for default sink card
+    ]
+  where
+    runPA :: (MonadIO m) => PulseAudioT IO () -> m ()
+    runPA action = do
+      result <- liftIO $ runPulseAudioTSession action
+      case result of
+        Right () -> pure ()
+        Left err -> debug $ "Could not select default sink: " <> err
+
+    selectDefaultSink :: (MonadIO m) => m ()
+    selectDefaultSink = runPA $ do
+      sinks <- getSinks
+      let nameToID = mapNameToID sinks
+      selected <- toText <<$>> dmenu (sinkName <$> sinks)
+      case selected >>= (`Map.lookup` nameToID) of
+        Just sinkID -> setDefaultSink sinkID
+        Nothing -> pure ()
+      where
+        sinkName :: Sink -> Text
+        sinkName Sink{name, description} = fromMaybe name description
+
+        mapNameToID :: [Sink] -> Map Text ObjectPath
+        mapNameToID sinks = Map.fromList $ (\s@Sink{sinkID} -> (sinkName s, sinkID)) <$> sinks

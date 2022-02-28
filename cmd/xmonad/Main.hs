@@ -16,7 +16,12 @@ main = do
   xmonad $ docks $ xConf xmobarHandle `additionalKeys` keybindings
 
 -- Scale the UI for high-DPI displays.
--- TODO: read xdpyinfo? Or maybe not? https://unix.stackexchange.com/questions/75344/how-does-x-server-calculate-dpi
--- Ugh, it looks like xdpyinfo doesn't have what we need - it reports 96x96 on my HiDPI laptop.
-dpi :: IO (Int, Int)
-dpi = undefined
+--
+-- TODO: read xdpyinfo? Or maybe not?
+--
+-- https://unix.stackexchange.com/questions/75344/how-does-x-server-calculate-dpi
+--
+-- Ugh, it looks like xdpyinfo doesn't have what we need - it reports 96x96 on
+-- my HiDPI laptop.
+-- dpi :: IO (Int, Int)
+-- dpi = undefined

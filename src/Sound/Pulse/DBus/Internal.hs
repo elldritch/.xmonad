@@ -30,9 +30,11 @@ import Data.Text (dropEnd)
 
 import Sound.Pulse.DBus (PulseAudioT)
 
+-- | Unwrap a Variant value.
 fromVariant' :: IsVariant a => Variant -> Either String a
 fromVariant' = maybeToRight "fromVariant': bad cast" . fromVariant
 
+-- | Get a value from a Variant dictionary.
 fromVariantMap :: (Monad m, Ord k, Show k, IsVariant v) => k -> Map k Variant -> PulseAudioT m v
 fromVariantMap k m =
   liftEither $

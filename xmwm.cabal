@@ -96,7 +96,6 @@ library
 
   build-depends:
     , dbus             ^>=1.2.22
-    , megaparsec       ^>=9.2.0
     , monad-control    ^>=1.0.3.1
     , mtl              ^>=2.2.2
     , safe-exceptions  ^>=0.1.7.2
@@ -116,7 +115,6 @@ test-suite tests
   build-tool-depends: hspec-discover:hspec-discover ^>=2.9.4
   build-depends:
     , hspec           ^>=2.9.4
-    , raw-strings-qq  ^>=1.1
     , xmwm
 
 executable xmonad
@@ -124,9 +122,6 @@ executable xmonad
   hs-source-dirs: cmd/xmonad
   main-is:        Main.hs
   build-depends:
-    , containers      ^>=0.6.4.1
-    , extra           ^>=1.7.9
-    , X11             ^>=1.10.2
     , xmonad          ^>=0.17
     , xmonad-contrib  ^>=0.17
     , xmwm

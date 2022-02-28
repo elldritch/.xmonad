@@ -1,5 +1,8 @@
--- | Utilities for looking up a PulseAudio server's D-Bus server address.
-module Sound.Pulse.DBus.Server (getPulseAudioServerAddress) where
+-- | Utilities for working with PulseAudio server lookup.
+module Sound.Pulse.DBus.Server (
+  getPulseAudioServerAddress,
+  runPulseAudioTSession,
+) where
 
 import Relude
 
@@ -15,7 +18,7 @@ import DBus (
  )
 import DBus.Client (connectSession, disconnect)
 
-import Sound.Pulse.DBus (runPulseAudioT')
+import Sound.Pulse.DBus (PulseAudioT, runPulseAudioT, runPulseAudioT')
 import Sound.Pulse.DBus.Internal (getPropertyBus)
 
 serverLookupDest :: BusName
@@ -49,3 +52,10 @@ getPulseAudioServerAddress = do
     runPulseAudioT' $ do
       reply <- getPropertyBus serverLookupDest serverLookupObject serverLookupInterface addressProperty
       maybe (throwError "getPulseAudioServerAddress: did not return a valid address") pure $ parseAddress reply
+
+-- | Like `runPulseAudioT`, but instead of specifying an address, automatically
+-- query the session D-Bus instance for PulseAudio's D-Bus server address.
+runPulseAudioTSession :: PulseAudioT IO a -> IO (Either String a)
+runPulseAudioTSession action = runExceptT $ do
+  addr <- ExceptT $ liftIO getPulseAudioServerAddress
+  ExceptT $ runPulseAudioT action addr
