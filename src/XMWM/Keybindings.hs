@@ -199,8 +199,8 @@ volumeBindings :: [Keybinding]
 volumeBindings =
   concat
     [ -- Toggle mute
-      withMask xK_F9 "amixer sset Capture toggle"
-    , withMask xK_F10 "amixer sset Master toggle"
+      withMask xK_F9 "amixer sset Master toggle"
+    , withMask xK_F10 "amixer sset Capture toggle"
     , -- Volume control
       withMask xK_F11 "amixer sset Master 1%-"
     , withMask xK_F12 "amixer sset Master 1%+"
@@ -209,13 +209,13 @@ volumeBindings =
 audioDeviceBindings :: [Keybinding]
 audioDeviceBindings =
   concat
-    [ -- Select default source
-      -- Select default sink
-      withSMask' xK_F10 selectDefaultSink
+    [ -- Select default sink
+      withSMask' xK_F9 selectDefaultSink
+    , -- Select default source
+      -- Select profile for default sink card
+      withSMask' xK_F11 selectDefaultSinkCardProfile
     , -- Select profile for default source card
-      withSMask' xK_F11 selectDefaultSourceCardProfile
-    , -- Select profile for default sink card
-      withSMask' xK_F12 selectDefaultSinkCardProfile
+      withSMask' xK_F12 selectDefaultSourceCardProfile
     ]
   where
     runPA :: (MonadIO m) => PulseAudioT IO () -> m ()
