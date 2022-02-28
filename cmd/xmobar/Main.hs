@@ -9,15 +9,15 @@ import Xmobar
 
 showBattery :: IO Bool
 showBattery = getAny . mconcat <$> mapM isBattery batteryIDs
- where
-  batteryIDs = ["BAT", "BAT0", "BAT1", "BAT2"]
-  isBattery batteryID = do
-    let f = "/sys/class/power_supply/" <> batteryID <> "/type"
-    exists <- doesFileExist f
-    Any
-      <$> if exists
-        then (== "Battery") <$> readFile "/sys/class/power_supply/BAT0/type"
-        else pure False
+  where
+    batteryIDs = ["BAT", "BAT0", "BAT1", "BAT2"]
+    isBattery batteryID = do
+      let f = "/sys/class/power_supply/" <> batteryID <> "/type"
+      exists <- doesFileExist f
+      Any
+        <$> if exists
+          then (== "Battery") <$> readFile "/sys/class/power_supply/BAT0/type"
+          else pure False
 
 -- Show if:
 --
@@ -61,18 +61,18 @@ showWirelessInterface = do
           Just _ -> False
           Nothing -> True
     Nothing -> pure True
- where
-  connectedEthernet :: [[Text]] -> Maybe Text
-  connectedEthernet lexed = asum $ line <$> lexed
-   where
-    line [_, "ethernet", "connected", connection] = Just connection
-    line _ = Nothing
+  where
+    connectedEthernet :: [[Text]] -> Maybe Text
+    connectedEthernet lexed = asum $ line <$> lexed
+      where
+        line [_, "ethernet", "connected", connection] = Just connection
+        line _ = Nothing
 
-  connectedWiFi :: [[Text]] -> Maybe Text
-  connectedWiFi lexed = asum $ line <$> lexed
-   where
-    line [_, "wifi", "connected", connection] = Just connection
-    line _ = Nothing
+    connectedWiFi :: [[Text]] -> Maybe Text
+    connectedWiFi lexed = asum $ line <$> lexed
+      where
+        line [_, "wifi", "connected", connection] = Just connection
+        line _ = Nothing
 
 main :: IO ()
 main = do
