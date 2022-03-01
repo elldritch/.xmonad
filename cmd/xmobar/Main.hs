@@ -94,8 +94,15 @@ main = do
                 ]
                 ["-L", "5", "-H", "70", "--normal", "green", "--high", "red"]
                 10
-          , Run $ Volume "default" "Master" [] 1 -- Using `Alsa` won't always pick up when the default sink changes.
-          , Run $ Alsa "default" "Capture" ["-t", "Mic: <volume>% <status>"]
+          , -- Using `Alsa` won't always pick up when the default sink changes
+            -- because that plugin runs `alsactl monitor` on the sink directly.
+            --
+            -- See also: https://github.com/jaor/xmobar/issues/566.
+            --
+            -- Instead, it seems like this is polling with new `pactl` clients?
+            -- To see, run `pactl subscribe` and `forkstat`.
+            Run $ Volume "default" "Master" [] 1
+          , Run $ Volume "default" "Capture" ["-t", "Mic: <volume>% <status>"] 1
           , Run $
               Wireless
                 ""
@@ -147,7 +154,7 @@ main = do
             ++ intercalate
               " | "
               ( [ "%cpu% %memory% Disk: %disku%"
-                , "%default:Master% %alsa:default:Capture%"
+                , "%default:Master% %default:Capture%"
                 , "%wi%"
                 ]
                   ++ ["%battery%" | batteryPowered]
