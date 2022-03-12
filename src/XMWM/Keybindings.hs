@@ -96,16 +96,16 @@ type Keybinding = ((KeyMask, KeySym), X ())
 
 -- | When this key is pressed, run a shell command.
 hotkey :: KeySym -> String -> [Keybinding]
-hotkey key = hotkey' key . spawn
+hotkey = spawning hotkey'
 
--- | When this key is pressed, run an arbitrary `X` action.
+-- | When this key is pressed, run an action.
 hotkey' :: KeySym -> X () -> [Keybinding]
 hotkey' = bindKey withoutMasks
 
 -- | `hotkey`, but only when the hotkey is pressed with one of the
 -- `defaultMasks`.
 withMask :: KeySym -> String -> [Keybinding]
-withMask key = withMask' key . spawn
+withMask = spawning withMask'
 
 -- | `hotkey'`, but only when the hotkey is pressed with one of the
 -- `defaultMasks`.
@@ -114,11 +114,14 @@ withMask' = bindKey defaultMasks
 
 -- | `withMask`, but shift must also be held.
 withSMask :: KeySym -> String -> [Keybinding]
-withSMask key = withSMask' key . spawn
+withSMask = spawning withSMask'
 
 -- | `withMask'`, but shift must also be held.
 withSMask' :: KeySym -> X () -> [Keybinding]
 withSMask' = bindKey $ (.|. shiftMask) <$> defaultMasks
+
+spawning :: (KeySym -> X () -> [Keybinding]) -> KeySym -> String -> [Keybinding]
+spawning makeKeybinding key = makeKeybinding key . spawn
 
 bindKey :: [KeyMask] -> KeySym -> X () -> [Keybinding]
 bindKey masks key action = [((mask, key), action) | mask <- masks]
