@@ -143,9 +143,14 @@ coreBindings =
   concat
     [ -- Dynamic workspaces
       withMask' xK_backslash $
-        workspaceFromDmenu >>= maybe (pure ()) addWorkspace
-    , withSMask' xK_backslash $
-        workspaceFromDmenu >>= maybe (pure ()) (addHiddenWorkspace >> windows . shift)
+        workspaceFromDmenu >>= maybe pass addWorkspace
+    , withSMask' xK_backslash $ do
+        selected <- workspaceFromDmenu
+        case selected of
+          Just ws -> do
+            addHiddenWorkspace ws
+            windows $ shift ws
+          Nothing -> pass
     , withMask' xK_Delete removeEmptyWorkspace
     , -- Recompile and reload XMonad
       withMask' xK_r $ do
@@ -233,7 +238,7 @@ audioDeviceBindings =
     runPA action = do
       result <- liftIO $ runPulseAudioTSession action
       case result of
-        Right () -> pure ()
+        Right () -> pass
         Left err -> debug $ "Could not select default sink: " <> err
 
     selectOption ::
@@ -245,7 +250,7 @@ audioDeviceBindings =
     selectOption options render setOption = do
       opts <- options
       selected <- dmenu' (toString . render) opts
-      maybe (pure ()) setOption selected
+      maybe pass setOption selected
 
     selectDefaultSink :: (MonadIO m) => m ()
     selectDefaultSink =
