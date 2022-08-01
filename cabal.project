@@ -3,7 +3,7 @@ packages: .
 -- When updating compiler version, make sure to also update:
 -- - /cabal.project
 -- - /xmwm.cabal
-with-compiler: ghc-8.10.7
+with-compiler: ghc-9.0.2
 
 tests: True
 documentation: False
