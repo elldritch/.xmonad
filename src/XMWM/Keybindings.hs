@@ -191,7 +191,7 @@ utilBindings =
       withSMask xK_c "xkill"
     , -- Screenshots
       hotkey xK_Print "maim ~/screenshots/$(date +%s).png"
-    , withMask xK_Print "maim -s ~/screenshots/$(date +%s).png"
+    , withMask xK_Print "maim --select --hidecursor ~/screenshots/$(date +%s).png"
     , -- Clipboard manager
       withMask xK_v "gpaste-client ui"
     ]
