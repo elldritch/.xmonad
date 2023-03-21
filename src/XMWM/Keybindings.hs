@@ -21,6 +21,8 @@ import Graphics.X11.Xlib (
   noModMask,
   shiftMask,
   xK_Delete,
+  xK_Escape,
+  xK_F1,
   xK_F10,
   xK_F11,
   xK_F12,
@@ -194,6 +196,9 @@ utilBindings =
     , withMask xK_Print "maim --select --hidecursor ~/screenshots/$(date +%s).png"
     , -- Clipboard manager
       withMask xK_v "gpaste-client ui"
+    , -- Notifications daemon
+      withMask xK_Escape "dunstctl close-all"
+    , withMask xK_F1 "dunstctl set-paused toggle"
     ]
 
 mediaKeyBindings :: [Keybinding]
