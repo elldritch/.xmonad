@@ -13,6 +13,7 @@ import XMonad.Hooks.Place (placeHook, simpleSmart)
 import XMonad.Hooks.SetWMName (setWMName)
 import XMonad.Layout.NoBorders (smartBorders)
 
+import XMWM.Applications.Zoom (zoomEventHook, zoomManageHook)
 import XMWM.Keybindings (superMask)
 import XMWM.Workspaces (defaultWorkspaces)
 import XMWM.XMobar (logWindowsToXMobar)
@@ -29,7 +30,8 @@ xConf outputHandle =
     , workspaces = snd <$> defaultWorkspaces
     , -- Workaround for Java Swing applications: https://stackoverflow.com/questions/30742662/java-swing-gui-not-displaying-in-xmonad
       startupHook = setWMName "LG3D"
-    , manageHook = mconcat [manageDocks, placeHook simpleSmart, manageHook def]
+    , manageHook = mconcat [zoomManageHook, manageDocks, placeHook simpleSmart, manageHook def]
+    , handleEventHook = mconcat [zoomEventHook, handleEventHook def]
     , layoutHook = avoidStruts $ smartBorders $ layoutHook def
     , logHook = logWindowsToXMobar outputHandle
     }

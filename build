@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-cabal install --overwrite-policy=always
+cabal install --overwrite-policy=always --install-method=copy

@@ -2,6 +2,7 @@ module Main (main) where
 
 import Relude
 
+import XMonad.Hooks.EwmhDesktops (ewmh)
 import XMonad.Hooks.ManageDocks (docks)
 import XMonad.Main (xmonad)
 import XMonad.Util.EZConfig (additionalKeys)
@@ -13,7 +14,7 @@ import XMWM.Keybindings (keybindings)
 main :: IO ()
 main = do
   xmobarHandle <- spawnPipe "xmobar"
-  xmonad $ docks $ xConf xmobarHandle `additionalKeys` keybindings
+  xmonad $ ewmh $ docks $ xConf xmobarHandle `additionalKeys` keybindings
 
 -- Scale the UI for high-DPI displays.
 --
