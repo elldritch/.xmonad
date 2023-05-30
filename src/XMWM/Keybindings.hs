@@ -194,6 +194,7 @@ utilBindings =
     , -- Screenshots
       hotkey xK_Print "maim ~/screenshots/$(date +%s).png"
     , withMask xK_Print "maim --select --hidecursor ~/screenshots/$(date +%s).png"
+    , withSMask xK_Print "maim --select --hidecursor --nodecorations 1 --tolerance 9999999 ~/screenshots/$(date +%s).png"
     , -- Clipboard manager
       withMask xK_v "gpaste-client ui"
     , -- Notifications daemon
