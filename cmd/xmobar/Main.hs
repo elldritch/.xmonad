@@ -2,10 +2,22 @@ module Main (main) where
 
 import Relude
 
+import Data.Text (strip)
 import System.Directory (doesFileExist, findExecutable)
 import System.Process (readProcess)
 
-import Xmobar
+import Xmobar (
+  Align (..),
+  Config (..),
+  Date (..),
+  Exec (..),
+  Monitors (..),
+  Runnable (..),
+  StdinReader (..),
+  XPosition (..),
+  defaultConfig,
+  xmobar,
+ )
 
 showBattery :: IO Bool
 showBattery = getAny . mconcat <$> mapM isBattery batteryIDs
@@ -16,7 +28,7 @@ showBattery = getAny . mconcat <$> mapM isBattery batteryIDs
       exists <- doesFileExist f
       Any
         <$> if exists
-          then (== "Battery") <$> readFile "/sys/class/power_supply/BAT0/type"
+          then (== "Battery") <$> readFileBS "/sys/class/power_supply/BAT0/type"
           else pure False
 
 -- Show if:
@@ -117,10 +129,11 @@ main = do
                 , "--high"
                 , "green"
                 , "-x"
-                , "-"
+                , ""
                 ]
                 10
           , Run $ Date "%k:%M %a %m/%d/%y" "datetime" 10
+          , Run Dunst
           ]
             ++ [ Run $
                 Battery
@@ -154,11 +167,29 @@ main = do
             ++ intercalate
               " | "
               ( [ "%cpu% %memory% Disk: %disku%"
-                , "%default:Master% %default:Capture%"
-                , "%wi%"
+                , "%default:Master% %default:Capture% %wi%"
+                , "%dunst%"
                 ]
                   ++ ["%battery%" | batteryPowered]
                   ++ ["%datetime%"]
               )
             ++ " "
       }
+
+data Dunst = Dunst
+  deriving stock (Show, Read)
+
+instance Exec Dunst where
+  alias :: Dunst -> String
+  alias Dunst = "dunst"
+
+  run :: Dunst -> IO String
+  run Dunst = do
+    isPaused <- strip . toText <$> readProcess "dunstctl" ["is-paused"] ""
+    case isPaused of
+      "false" -> toString . strip . toText <$> readProcess "dunstctl" ["count", "displayed"] ""
+      "true" -> pure "<fc=white>P</fc>"
+      _ -> pure "<fc=red>?</fc>"
+
+  rate :: Dunst -> Int
+  rate Dunst = 10
