@@ -14,6 +14,3 @@ optimization: False
 index-state:  hackage.haskell.org 2022-08-20T01:40:34Z
 
 constraints: xmobar +with_xft +with_utf8 +with_alsa +with_nl80211
-
-package *
-  documentation: True
