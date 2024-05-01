@@ -3,7 +3,7 @@ packages: .
 -- When updating compiler version, make sure to also update:
 -- - /cabal.project
 -- - /xmwm.cabal
-with-compiler: ghc-9.0.2
+with-compiler: ghc-9.4.7
 
 tests: True
 documentation: False
@@ -11,6 +11,6 @@ haddock-all: True
 haddock-internal: True
 optimization: False
 
-index-state:  hackage.haskell.org 2022-08-20T01:40:34Z
+index-state:  hackage.haskell.org 2024-04-30T23:34:05Z
 
 constraints: xmobar +with_xft +with_utf8 +with_alsa +with_nl80211

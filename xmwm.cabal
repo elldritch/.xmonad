@@ -10,8 +10,8 @@ tested-with:   GHC ==9.0.2
 
 common lang
   build-depends:
-    , base    ^>=4.15
-    , relude  ^>=1.1.0.0
+    , base    ^>=4.17
+    , relude  ^>=1.2.1.0
 
   default-language:   Haskell2010
   default-extensions:
@@ -133,6 +133,6 @@ executable xmobar
   build-depends:
     , directory
     , process
-    , xmobar     ^>=0.44.2
+    , xmobar     ^>=0.48
 
   ghc-options:    -threaded
