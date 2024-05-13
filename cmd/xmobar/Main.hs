@@ -7,7 +7,6 @@ import System.Directory (doesFileExist, findExecutable)
 import System.Process (readProcess)
 
 import Xmobar (
-  Align (..),
   Config (..),
   Date (..),
   Exec (..),
@@ -58,6 +57,13 @@ showBattery = getAny . mconcat <$> mapM isBattery batteryIDs
 --
 -- 1. TODO: How do I get a list of ethernet devices?
 -- 2. `cat /sys/class/net/DEVICE/operstate` == `up`.
+--
+-- ----
+--
+-- I should write a plugin that takes any `Runnable` and makes it dynamic by
+-- wrapping it using a function that returns `Bool` to determine whether to
+-- show it or not.
+--
 showWirelessInterface :: IO Bool
 showWirelessInterface = do
   hasNMCLI <- findExecutable "nmcli"
@@ -94,7 +100,7 @@ main = do
       { font = "xft:monospace 11"
       , bgColor = "black"
       , fgColor = "silver"
-      , position = TopW L 100
+      , position = TopH 30
       , commands =
           [ Run StdinReader
           , Run $ Cpu ["-L", "3", "-H", "70", "--normal", "lime", "--high", "red"] 10
@@ -113,26 +119,26 @@ main = do
             --
             -- Instead, it seems like this is polling with new `pactl` clients?
             -- To see, run `pactl subscribe` and `forkstat`.
-            Run $ Volume "default" "Master" [] 1
-          , Run $ Volume "default" "Capture" ["-t", "Mic: <volume>% <status>"] 1
-          , Run $
-              Wireless
-                ""
-                [ "--Low"
-                , "55"
-                , "--High"
-                , "80"
-                , "--low"
-                , "red"
-                , "--normal"
-                , "yellow"
-                , "--high"
-                , "lime"
-                , "-x"
-                , ""
-                ]
-                10
-          , Run $ Date "%k:%M %a %m/%d/%y" "datetime" 10
+            Run $ Volume "default" "Master" ["--", "--onc", "lime"] 1
+          , Run $ Volume "default" "Capture" ["-t", "Mic: <volume>% <status>", "--", "--onc", "lime"] 1
+          , -- , Run $
+            --     Wireless
+            --       ""
+            --       [ "--Low"
+            --       , "55"
+            --       , "--High"
+            --       , "80"
+            --       , "--low"
+            --       , "red"
+            --       , "--normal"
+            --       , "yellow"
+            --       , "--high"
+            --       , "lime"
+            --       , "-x"
+            --       , ""
+            --       ]
+            --       10
+            Run $ Date "%k:%M %a %m/%d/%y" "datetime" 10
           , Run Dunst
           ]
             ++ [ Run $
@@ -163,11 +169,12 @@ main = do
       , sepChar = "%"
       , alignSep = "}{"
       , template =
-          " %StdinReader% }{ "
+          "} %StdinReader%{ "
             ++ intercalate
               " | "
               ( [ "%cpu% %memory% Disk: %disku%"
-                , "%default:Master% %default:Capture% %wi%"
+                , -- , "%default:Master% %default:Capture% %wi%"
+                  "%default:Master% %default:Capture%"
                 , "%dunst%"
                 ]
                   ++ ["%battery%" | batteryPowered]

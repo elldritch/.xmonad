@@ -5,12 +5,11 @@ version:       0.0.1.0
 
 common lang
   build-depends:
-    , base    == 4.17.2.1
+    , base    ==4.17.2.1
     , relude  ==1.2.1.0
 
   default-language:   GHC2021
   default-extensions:
-    NoImplicitPrelude
     Arrows
     DataKinds
     DefaultSignatures
@@ -19,6 +18,7 @@ common lang
     DerivingVia
     DuplicateRecordFields
     LambdaCase
+    NoImplicitPrelude
     OverloadedLabels
     OverloadedStrings
     QuasiQuotes

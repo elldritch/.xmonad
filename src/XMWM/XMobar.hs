@@ -4,7 +4,7 @@ module XMWM.XMobar (logWindowsToXMobar) where
 import Relude
 
 import XMonad.Core (X, withWindowSet)
-import XMonad.Hooks.StatusBar.PP (PP (..), dynamicLogWithPP, shorten, xmobarColor, xmobarPP)
+import XMonad.Hooks.StatusBar.PP (PP (..), dynamicLogWithPP, xmobarColor, xmobarPP)
 import XMonad.StackSet (index, peek)
 import XMonad.Util.Loggers (Logger)
 import XMonad.Util.NamedWindows (getName, unName)
@@ -28,10 +28,9 @@ logWindowsToXMobar xmobarHandle =
     logTitles ppFocus =
       withWindowSet $ fmap (Just . intercalate " | ") . windowTitles
       where
-        windowName = shorten 30 . show
         isFocused windowSet target = (== Just (unName target)) $ peek windowSet
         highlightFocused windowSet target =
-          (if isFocused windowSet target then ppFocus else id) $ windowName target
+          (if isFocused windowSet target then ppFocus else id) $ show target
         namedWindows = fmap getName . index
         windowTitles windowSet =
           mapM (fmap $ highlightFocused windowSet) $ namedWindows windowSet
