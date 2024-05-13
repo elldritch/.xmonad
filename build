@@ -9,3 +9,4 @@ cabal build
 cp -uf `cabal list-bin xmonad` $OUTPUT
 cp -uf `cabal list-bin xmonad` $HOME/.cabal/bin/xmonad
 cp -uf `cabal list-bin xmobar` $HOME/.cabal/bin/xmobar
+cp -uf `cabal list-bin taffybar` $HOME/.cabal/bin/taffybar

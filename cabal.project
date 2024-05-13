@@ -11,3 +11,8 @@ optimization: False
 index-state:  hackage.haskell.org 2024-05-13T18:27:58Z
 
 constraints: xmobar +with_xft +with_utf8 +with_alsa +with_nl80211
+
+source-repository-package
+  type: git
+  location: https://github.com/iliastsi/haskell-gi.git
+  tag: 9ee545ad5028e5de8e1e1d96bbba2b9dbab47480
