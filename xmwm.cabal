@@ -3,70 +3,29 @@ name:          xmwm
 synopsis:      A window manager based off of XMonad.
 version:       0.0.1.0
 
--- When updating compiler version, make sure to also update:
--- - /cabal.project
--- - /xmwm.cabal
-tested-with:   GHC ==9.0.2
-
 common lang
   build-depends:
-    , base    ^>=4.17
-    , relude  ^>=1.2.1.0
+    , base    == 4.17.2.1
+    , relude  ==1.2.1.0
 
-  default-language:   Haskell2010
+  default-language:   GHC2021
   default-extensions:
     NoImplicitPrelude
     Arrows
-    BangPatterns
-    BinaryLiterals
-    ConstrainedClassMethods
-    ConstraintKinds
     DataKinds
     DefaultSignatures
     DeriveAnyClass
-    DeriveDataTypeable
-    DeriveFoldable
-    DeriveFunctor
-    DeriveGeneric
-    DeriveLift
-    DeriveTraversable
     DerivingStrategies
     DerivingVia
     DuplicateRecordFields
-    EmptyCase
-    EmptyDataDeriving
-    ExistentialQuantification
-    ExplicitForAll
-    FlexibleContexts
-    FlexibleInstances
-    GADTSyntax
-    GeneralizedNewtypeDeriving
-    HexFloatLiterals
-    ImportQualifiedPost
-    InstanceSigs
-    KindSignatures
     LambdaCase
-    MultiParamTypeClasses
-    NamedFieldPuns
-    NamedWildCards
-    NumericUnderscores
     OverloadedLabels
     OverloadedStrings
-    PolyKinds
-    PostfixOperators
     QuasiQuotes
-    RankNTypes
     RecordWildCards
-    ScopedTypeVariables
-    StandaloneDeriving
-    StandaloneKindSignatures
     StrictData
     TemplateHaskell
-    TupleSections
-    TypeApplications
     TypeFamilies
-    TypeOperators
-    TypeSynonymInstances
 
   ghc-options:
     -Wall -Wincomplete-uni-patterns -Wcompat
@@ -95,14 +54,14 @@ library
     XMWM.XMobar
 
   build-depends:
-    , data-default     ^>=0.7.1.1
-    , dbus             ^>=1.2.22
-    , monad-control    ^>=1.0.3.1
+    , data-default     ==0.7.1.1
+    , dbus             ==1.3.5
+    , monad-control    ==1.0.3.1
     , mtl
-    , safe-exceptions  ^>=0.1.7.2
-    , X11              ^>=1.10.2
-    , xmonad           ^>=0.17
-    , xmonad-contrib   ^>=0.17
+    , safe-exceptions  ==0.1.7.4
+    , X11              ==1.10.3
+    , xmonad           ==0.18.0
+    , xmonad-contrib   ==0.18.0
 
 test-suite tests
   import:             lang
@@ -112,9 +71,9 @@ test-suite tests
 
   -- cabal-fmt: expand test -Main
   other-modules:
-  build-tool-depends: hspec-discover:hspec-discover ^>=2.10.0.1
+  build-tool-depends: hspec-discover:hspec-discover ==2.10.0.1
   build-depends:
-    , hspec  ^>=2.10.0.1
+    , hspec  ==2.10.0.1
     , xmwm
 
 executable xmonad
@@ -122,8 +81,8 @@ executable xmonad
   hs-source-dirs: cmd/xmonad
   main-is:        Main.hs
   build-depends:
-    , xmonad          ^>=0.17
-    , xmonad-contrib  ^>=0.17
+    , xmonad          ==0.18.0
+    , xmonad-contrib  ==0.18.0
     , xmwm
 
 executable xmobar
@@ -133,6 +92,6 @@ executable xmobar
   build-depends:
     , directory
     , process
-    , xmobar     ^>=0.48
+    , xmobar     ==0.46
 
   ghc-options:    -threaded

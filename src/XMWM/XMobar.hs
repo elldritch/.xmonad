@@ -17,8 +17,8 @@ logWindowsToXMobar xmobarHandle =
   dynamicLogWithPP
     xmobarPP
       { ppOutput = hPutStrLn xmobarHandle
-      , ppTitle = xmobarColor "green" ""
-      , ppExtras = [logTitles (xmobarColor "green" "")]
+      , ppTitle = xmobarColor "lime" ""
+      , ppExtras = [logTitles (xmobarColor "lime" "")]
       , ppOrder = \case
           (workspaces : layout : _ : extras) -> [workspaces, layout] ++ extras
           _ -> error "impossible: xmobar pretty-print args malformed"
@@ -28,7 +28,7 @@ logWindowsToXMobar xmobarHandle =
     logTitles ppFocus =
       withWindowSet $ fmap (Just . intercalate " | ") . windowTitles
       where
-        windowName = shorten 50 . show
+        windowName = shorten 30 . show
         isFocused windowSet target = (== Just (unName target)) $ peek windowSet
         highlightFocused windowSet target =
           (if isFocused windowSet target then ppFocus else id) $ windowName target

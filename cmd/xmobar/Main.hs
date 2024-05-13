@@ -91,20 +91,20 @@ main = do
   batteryPowered <- showBattery
   xmobar $
     defaultConfig
-      { font = "xft:monospace"
+      { font = "xft:monospace 11"
       , bgColor = "black"
-      , fgColor = "grey"
+      , fgColor = "silver"
       , position = TopW L 100
       , commands =
           [ Run StdinReader
-          , Run $ Cpu ["-L", "3", "-H", "70", "--normal", "green", "--high", "red"] 10
-          , Run $ Memory ["-t", "Mem: <usedratio>%", "-L", "5", "-H", "70", "--normal", "green", "--high", "red"] 10
+          , Run $ Cpu ["-L", "3", "-H", "70", "--normal", "lime", "--high", "red"] 10
+          , Run $ Memory ["-t", "Mem: <usedratio>%", "-L", "5", "-H", "70", "--normal", "lime", "--high", "red"] 10
           , Run $
               DiskU
                 [ ("/", "/: <used>/<size> (<usedp>%)")
                 , ("/home", "/home: <used>/<size> (<usedp>%)")
                 ]
-                ["-L", "5", "-H", "70", "--normal", "green", "--high", "red"]
+                ["-L", "5", "-H", "70", "--normal", "lime", "--high", "red"]
                 10
           , -- Using `Alsa` won't always pick up when the default sink changes
             -- because that plugin runs `alsactl monitor` on the sink directly.
@@ -127,7 +127,7 @@ main = do
                 , "--normal"
                 , "yellow"
                 , "--high"
-                , "green"
+                , "lime"
                 , "-x"
                 , ""
                 ]
@@ -148,7 +148,7 @@ main = do
                   , "--normal"
                   , "yellow"
                   , "--high"
-                  , "green"
+                  , "lime"
                   , "--"
                   , "-O"
                   , " (Charging)"

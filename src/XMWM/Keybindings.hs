@@ -42,9 +42,9 @@ import Graphics.X11.Xlib (
  )
 import XMonad.Actions.DynamicWorkspaces (addHiddenWorkspace, addWorkspace, removeEmptyWorkspace)
 import XMonad.Actions.PhysicalScreens (sendToScreen, viewScreen)
-import XMonad.Core (X, getDirectories, recompile, spawn)
+import XMonad.Core (X, spawn)
 import XMonad.Hooks.ManageDocks (ToggleStruts (..))
-import XMonad.Operations (kill, restart, sendMessage, windows)
+import XMonad.Operations (kill, sendRestart, sendMessage, windows)
 import XMonad.StackSet (greedyView, shift)
 
 import Sound.Pulse.DBus (PulseAudioT)
@@ -155,10 +155,7 @@ coreBindings =
           Nothing -> pass
     , withMask' xK_Delete removeEmptyWorkspace
     , -- Recompile and reload XMonad
-      withMask' xK_r $ do
-        dirs <- liftIO getDirectories
-        ok <- recompile dirs False
-        if ok then restart "xmonad" True else spawn "xmessage recompile failed"
+      withMask' xK_r $ liftIO sendRestart
     , -- Exit XMonad
       withSMask' xK_r exitSuccess
     , -- Close focused window
