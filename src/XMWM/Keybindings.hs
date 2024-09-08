@@ -242,7 +242,7 @@ audioDeviceBindings =
       result <- liftIO $ runPulseAudioTSession action
       case result of
         Right () -> pass
-        Left err -> debug $ "Could not select default sink: " <> err
+        Left err -> debug $ "Could not select PulseAudio device: " <> err
 
     selectOption ::
       (MonadIO m, ToString s) =>

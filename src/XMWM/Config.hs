@@ -26,7 +26,7 @@ xConf outputHandle =
     , modMask = superMask
     , focusFollowsMouse = False
     , clickJustFocuses = False
-    , terminal = "terminator"
+    , terminal = "alacritty"
     , workspaces = snd <$> defaultWorkspaces
     , -- Workaround for Java Swing applications: https://stackoverflow.com/questions/30742662/java-swing-gui-not-displaying-in-xmonad
       startupHook = setWMName "LG3D"
