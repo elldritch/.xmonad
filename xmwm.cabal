@@ -20,6 +20,7 @@ common lang
     LambdaCase
     NoImplicitPrelude
     OverloadedLabels
+    OverloadedRecordDot
     OverloadedStrings
     QuasiQuotes
     RecordWildCards
@@ -38,17 +39,21 @@ library
 
   -- cabal-fmt: expand src
   exposed-modules:
-    Sound.Pulse.DBus
-    Sound.Pulse.DBus.Card
-    Sound.Pulse.DBus.Device
-    Sound.Pulse.DBus.Interfaces
-    Sound.Pulse.DBus.Internal
-    Sound.Pulse.DBus.Server
     XMWM.Applications.Zoom
     XMWM.Config
+    XMWM.DBus
+    XMWM.DBus.Interfaces
     XMWM.Debug
     XMWM.Keybindings
     XMWM.Prompt
+    XMWM.Sound.MPRIS.DBus
+    XMWM.Sound.MPRIS.DBus.Interfaces
+    XMWM.Sound.MPRIS.DBus.Player
+    XMWM.Sound.Pulse.DBus
+    XMWM.Sound.Pulse.DBus.Card
+    XMWM.Sound.Pulse.DBus.Device
+    XMWM.Sound.Pulse.DBus.Interfaces
+    XMWM.Sound.Pulse.DBus.Server
     XMWM.Spawn
     XMWM.Workspaces
     XMWM.XMobar

@@ -7,8 +7,8 @@ import XMonad.Util.Run (runProcessWithInput)
 
 import XMWM.Debug (debug)
 
--- | Spawn a command using `spawnOutput`, logging both the command and its
--- output using `debug`.
+-- | Spawn a command using 'spawnOutput', logging both the command and its
+-- output using 'debug'.
 spawnDebug :: (MonadIO m) => String -> String -> m String
 spawnDebug msg cmd = do
   debug msg

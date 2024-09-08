@@ -3,12 +3,16 @@ module XMWM.Keybindings (keybindings, superMask) where
 
 import Relude
 
+import Control.Monad.Except (MonadError, liftEither)
 import Data.Bits ((.|.))
 import Data.Default (def)
 import Graphics.X11.ExtraTypes.XF86 (
+  xF86XK_AudioForward,
   xF86XK_AudioLowerVolume,
   xF86XK_AudioMicMute,
   xF86XK_AudioMute,
+  xF86XK_AudioPlay,
+  xF86XK_AudioPrev,
   xF86XK_AudioRaiseVolume,
   xF86XK_MonBrightnessDown,
   xF86XK_MonBrightnessUp,
@@ -21,13 +25,17 @@ import Graphics.X11.Xlib (
   noModMask,
   shiftMask,
   xK_Delete,
+  xK_Down,
   xK_Escape,
   xK_F1,
   xK_F10,
   xK_F11,
   xK_F12,
   xK_F9,
+  xK_Left,
   xK_Print,
+  xK_Right,
+  xK_Up,
   xK_b,
   xK_backslash,
   xK_c,
@@ -42,20 +50,26 @@ import Graphics.X11.Xlib (
  )
 import XMonad.Actions.DynamicWorkspaces (addHiddenWorkspace, addWorkspace, removeEmptyWorkspace)
 import XMonad.Actions.PhysicalScreens (sendToScreen, viewScreen)
-import XMonad.Core (X, spawn)
+import XMonad.Core (ExtensionClass (..), X, spawn)
 import XMonad.Hooks.ManageDocks (ToggleStruts (..))
-import XMonad.Operations (kill, sendRestart, sendMessage, windows)
+import XMonad.Operations (kill, sendMessage, sendRestart, windows)
 import XMonad.StackSet (greedyView, shift)
+import XMonad.Util.ExtensibleState qualified as XS
 
-import Sound.Pulse.DBus (PulseAudioT)
-import Sound.Pulse.DBus.Card (
+import XMWM.Debug (debug)
+import XMWM.Prompt (dmenu')
+import XMWM.Sound.MPRIS.DBus (MPRIST, runMPRIST)
+import XMWM.Sound.MPRIS.DBus.Player (Player (..), listPlayers)
+import XMWM.Sound.MPRIS.DBus.Player qualified as Player (next, pause, play, playPause, previous)
+import XMWM.Sound.Pulse.DBus (PulseAudioT)
+import XMWM.Sound.Pulse.DBus.Card (
   CardProfile (..),
   getDefaultSinkCardProfiles,
   getDefaultSourceCardProfiles,
   setDefaultSinkCardProfile,
   setDefaultSourceCardProfile,
  )
-import Sound.Pulse.DBus.Device (
+import XMWM.Sound.Pulse.DBus.Device (
   deviceID,
   devicePrettyName,
   getSinks,
@@ -63,9 +77,7 @@ import Sound.Pulse.DBus.Device (
   setDefaultSink,
   setDefaultSource,
  )
-import Sound.Pulse.DBus.Server (runPulseAudioTSession)
-import XMWM.Debug (debug)
-import XMWM.Prompt (dmenu')
+import XMWM.Sound.Pulse.DBus.Server (runPulseAudioTSession)
 import XMWM.Workspaces (defaultWorkspaces, workspaceFromDmenu)
 
 -- Masks
@@ -104,21 +116,25 @@ hotkey = spawning hotkey'
 hotkey' :: KeySym -> X () -> [Keybinding]
 hotkey' = bindKey withoutMasks
 
--- | `hotkey`, but only when the hotkey is pressed with one of the
--- `defaultMasks`.
+-- | 'hotkey'', but shift must also be held.
+hotkeyS' :: KeySym -> X () -> [Keybinding]
+hotkeyS' = bindKey [shiftMask]
+
+-- | 'hotkey', but only when the hotkey is pressed with one of the
+-- 'defaultMasks'.
 withMask :: KeySym -> String -> [Keybinding]
 withMask = spawning withMask'
 
--- | `hotkey'`, but only when the hotkey is pressed with one of the
--- `defaultMasks`.
+-- | 'hotkey'', but only when the hotkey is pressed with one of the
+-- 'defaultMasks'.
 withMask' :: KeySym -> X () -> [Keybinding]
 withMask' = bindKey defaultMasks
 
--- | `withMask`, but shift must also be held.
+-- | 'withMask', but shift must also be held.
 withSMask :: KeySym -> String -> [Keybinding]
 withSMask = spawning withSMask'
 
--- | `withMask'`, but shift must also be held.
+-- | 'withMask'', but shift must also be held.
 withSMask' :: KeySym -> X () -> [Keybinding]
 withSMask' = bindKey $ (.|. shiftMask) <$> defaultMasks
 
@@ -136,6 +152,7 @@ keybindings =
     [ coreBindings
     , utilBindings
     , mediaKeyBindings
+    , mprisBindings
     , volumeBindings
     , audioDeviceBindings
     ]
@@ -213,6 +230,47 @@ mediaKeyBindings =
       hotkey xF86XK_AudioMicMute "amixer sset Capture toggle"
     ]
 
+newtype MPRISState = MPRISState (Maybe Player)
+
+instance ExtensionClass MPRISState where
+  initialValue = MPRISState Nothing
+
+mprisBindings :: [Keybinding]
+mprisBindings =
+  concat
+    [ -- Select MPRIS players
+      hotkeyS' xF86XK_AudioPlay selectPlayer
+    , withSMask' xK_Up selectPlayer
+    , -- Control MPRIS players
+      hotkey' xF86XK_AudioPlay $ player Player.playPause
+    , withMask' xK_Up $ player Player.play
+    , withMask' xK_Down $ player Player.pause
+    , hotkey' xF86XK_AudioForward $ player Player.next
+    , withMask' xK_Right $ player Player.next
+    , hotkey' xF86XK_AudioPrev $ player Player.previous
+    , withMask' xK_Left $ player Player.previous
+    ]
+  where
+    run action = do
+      result <- runExceptT action
+      case result of
+        Left err -> debug $ "Could not run MPRIS action: " <> err
+        Right _ -> pass
+    runMPRIST' action = liftEither =<< liftIO (runMPRIST action)
+
+    selectPlayer :: X ()
+    selectPlayer = run $ do
+      players <- runMPRIST' listPlayers
+      selected <- dmenu' (.identity) players
+      lift $ XS.put $ MPRISState $ Just selected
+
+    player :: (Player -> MPRIST IO ()) -> X ()
+    player action = run $ do
+      selected <- do
+        (MPRISState selectedPlayer) <- lift XS.get
+        liftEither $ maybeToRight "No player selected" selectedPlayer
+      runMPRIST' $ action selected
+
 volumeBindings :: [Keybinding]
 volumeBindings =
   concat
@@ -244,17 +302,6 @@ audioDeviceBindings =
         Right () -> pass
         Left err -> debug $ "Could not select PulseAudio device: " <> err
 
-    selectOption ::
-      (MonadIO m, ToString s) =>
-      PulseAudioT m [a] ->
-      (a -> s) ->
-      (a -> PulseAudioT m ()) ->
-      PulseAudioT m ()
-    selectOption options render setOption = do
-      opts <- options
-      selected <- dmenu' (toString . render) opts
-      maybe pass setOption selected
-
     selectDefaultSink :: (MonadIO m) => m ()
     selectDefaultSink =
       runPA $ selectOption getSinks devicePrettyName (setDefaultSink . deviceID)
@@ -284,3 +331,14 @@ audioDeviceBindings =
     selectDefaultSourceCardProfile :: (MonadIO m) => m ()
     selectDefaultSourceCardProfile =
       runPA $ selectOption getDefaultSourceCardProfiles description (setDefaultSourceCardProfile . profileID)
+
+selectOption ::
+  (MonadIO m, MonadError String m, ToString s) =>
+  m [a] ->
+  (a -> s) ->
+  (a -> m b) ->
+  m b
+selectOption options render setOption = do
+  opts <- options
+  selected <- dmenu' (toString . render) opts
+  setOption selected

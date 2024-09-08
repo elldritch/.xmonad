@@ -1,4 +1,4 @@
-module Sound.Pulse.DBus.Interfaces (
+module XMWM.Sound.Pulse.DBus.Interfaces (
   -- * Core
   coreObject,
   coreInterface,

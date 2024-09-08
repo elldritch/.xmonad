@@ -1,4 +1,4 @@
-module Sound.Pulse.DBus.Card (
+module XMWM.Sound.Pulse.DBus.Card (
   CardProfile (..),
   getDefaultSinkCardProfiles,
   setDefaultSinkCardProfile,
@@ -10,8 +10,9 @@ import Relude
 
 import DBus (ObjectPath, Variant)
 
-import Sound.Pulse.DBus (PulseAudioT)
-import Sound.Pulse.DBus.Interfaces (
+import XMWM.DBus (fromVariantMap, getAllProperties, getProperty, setProperty)
+import XMWM.Sound.Pulse.DBus (PulseAudioT)
+import XMWM.Sound.Pulse.DBus.Interfaces (
   cardActiveProfileProperty,
   cardInterface,
   cardProfileInterface,
@@ -23,7 +24,6 @@ import Sound.Pulse.DBus.Interfaces (
   deviceCardProperty,
   deviceInterface,
  )
-import Sound.Pulse.DBus.Internal (fromVariantMap, getAllProperties, getProperty, setProperty)
 
 data CardProfile = CardProfile
   { profileID :: CardProfileID

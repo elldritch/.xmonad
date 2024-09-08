@@ -1,4 +1,4 @@
-module Sound.Pulse.DBus.Device (
+module XMWM.Sound.Pulse.DBus.Device (
   Device (..),
   DeviceID,
   devicePrettyName,
@@ -13,8 +13,16 @@ import Relude
 import DBus (IsVariant, MemberName, ObjectPath, Variant, toVariant)
 import Data.Text (stripEnd, stripSuffix)
 
-import Sound.Pulse.DBus (PulseAudioT)
-import Sound.Pulse.DBus.Interfaces (
+import XMWM.DBus (
+  call,
+  fromVariantMap,
+  fromVariantMap',
+  getAllProperties,
+  getProperty,
+  setProperty,
+ )
+import XMWM.Sound.Pulse.DBus (PulseAudioT, fromPropList)
+import XMWM.Sound.Pulse.DBus.Interfaces (
   coreDefaultSinkProperty,
   coreDefaultSourceProperty,
   coreInterface,
@@ -26,15 +34,6 @@ import Sound.Pulse.DBus.Interfaces (
   deviceInterface,
   streamInterface,
   streamMoveMethod,
- )
-import Sound.Pulse.DBus.Internal (
-  call,
-  fromPropList,
-  fromVariantMap,
-  fromVariantMap',
-  getAllProperties,
-  getProperty,
-  setProperty,
  )
 
 data Device = Device
