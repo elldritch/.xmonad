@@ -6,6 +6,8 @@ import Relude
 import Control.Monad.Except (MonadError, liftEither)
 import Data.Bits ((.|.))
 import Data.Default (def)
+import Data.Map.Strict qualified as Map
+import Data.Set qualified as Set
 import Graphics.X11.ExtraTypes.XF86 (
   xF86XK_AudioForward,
   xF86XK_AudioLowerVolume,
@@ -17,7 +19,7 @@ import Graphics.X11.ExtraTypes.XF86 (
   xF86XK_MonBrightnessDown,
   xF86XK_MonBrightnessUp,
  )
-import Graphics.X11.Types (KeyMask, KeySym)
+import Graphics.X11.Types (KeyMask, KeySym, Window)
 import Graphics.X11.Xlib (
   mod1Mask,
   mod3Mask,
@@ -44,16 +46,33 @@ import Graphics.X11.Xlib (
   xK_p,
   xK_q,
   xK_r,
+  xK_t,
   xK_u,
   xK_v,
   xK_w,
  )
 import XMonad.Actions.DynamicWorkspaces (addHiddenWorkspace, addWorkspace, removeEmptyWorkspace)
 import XMonad.Actions.PhysicalScreens (sendToScreen, viewScreen)
-import XMonad.Core (ExtensionClass (..), X, spawn)
+import XMonad.Core (ExtensionClass (..), ScreenId, X, spawn, withWindowSet)
 import XMonad.Hooks.ManageDocks (ToggleStruts (..))
-import XMonad.Operations (kill, sendMessage, sendRestart, windows)
-import XMonad.StackSet (greedyView, shift)
+import XMonad.Operations (float, kill, sendMessage, sendRestart, windows, withFocused)
+import XMonad.StackSet (
+  Screen,
+  Stack,
+  current,
+  delete',
+  differentiate,
+  down,
+  greedyView,
+  integrate',
+  screen,
+  screens,
+  shift,
+  sink,
+  stack,
+  visible,
+  workspace,
+ )
 import XMonad.Util.ExtensibleState qualified as XS
 
 import XMWM.Debug (debug)
@@ -157,6 +176,11 @@ keybindings =
     , audioDeviceBindings
     ]
 
+newtype PinsState = PinsState (Set Window)
+
+instance ExtensionClass PinsState where
+  initialValue = PinsState def
+
 coreBindings :: [Keybinding]
 coreBindings =
   concat
@@ -179,12 +203,24 @@ coreBindings =
       withMask' xK_c kill
     , -- Toggle struts (xmobar visibility)
       withMask' xK_b $ sendMessage ToggleStruts
+    , -- Pin a window
+      withSMask' xK_p $ withFocused $ \w ->
+        XS.modifyM $ \(PinsState pins) ->
+          PinsState
+            <$> if Set.member w pins
+              then Set.delete w pins <$ windows (sink w)
+              else Set.insert w pins <$ float w
+    , -- Unfloat a window. Unfloating pinned windows also unpins them.
+      withMask' xK_t $ withFocused $ \w ->
+        XS.modifyM $ \(PinsState pins) ->
+          PinsState
+            <$> (Set.delete w pins <$ windows (sink w))
     ]
     ++
     -- Swap workspace to monitor
-    [ ((mask .|. extraMask, key), windows $ action workspace)
-    | (key, workspace) <- defaultWorkspaces
-    , (action, extraMask) <- [(greedyView, noModMask), (shift, shiftMask)]
+    [ ((mask .|. extraMask, key), action workspaceId)
+    | (key, workspaceId) <- defaultWorkspaces
+    , (action, extraMask) <- [(viewWorkspace, noModMask), (windows . shift, shiftMask)]
     , mask <- defaultMasks
     ]
     ++
@@ -194,6 +230,52 @@ coreBindings =
     , (action, extraMask) <- [(viewScreen, noModMask), (sendToScreen, shiftMask)]
     , mask <- defaultMasks
     ]
+  where
+    -- Like 'greedyView', but handles pinned windows.
+    --
+    -- From 'greedyView':
+    --
+    -- > Set focus to the given workspace. If that workspace does not exist in
+    -- > the stackset, the original workspace is returned. If that workspace is
+    -- > hidden, then display that workspace on the current screen, and move the
+    -- > current workspace to hidden. If that workspace is visible on another
+    -- > screen, the workspaces of the current screen and the other screen are
+    -- > swapped.
+    --
+    -- This function first checks for pinned windows in the current workspace
+    -- and notes their screen ID. It then performs a 'greedyView', and checks
+    -- whether the screen ID of the pinned windows has changed. If so, it
+    -- restores the pinned windows to their original pinned screen.
+    viewWorkspace swapToWorkspaceId = withWindowSet $ \ws -> do
+      -- In all visible screens, get the pinned windows.
+      (PinsState pinnedSet) <- XS.get
+      let
+        visiblePinned = flip map (screens ws) $ \screen ->
+          (screen.screen, filter (`Set.member` pinnedSet) $ integrate' screen.workspace.stack)
+        pinnedWindows = concatMap snd visiblePinned
+        pinMap = Map.fromList visiblePinned
+
+      -- Remove the pinned windows from all visible screens.
+      let pruned = foldl' (flip delete') ws pinnedWindows
+
+      -- Swap workspaces.
+      let swapped = greedyView swapToWorkspaceId pruned
+
+      -- In all visible screens, restore pinned windows.
+      let repin' = repin pinMap
+      let repinned = swapped{current = repin' swapped.current, visible = map repin' swapped.visible}
+      windows $ const repinned
+      where
+        repin :: Map ScreenId [Window] -> Screen i l Window ScreenId sd -> Screen i l Window ScreenId sd
+        repin pinMap screen =
+          screen{workspace = screen.workspace{stack = insertBottom screen.workspace.stack $ windowsForScreen screen.screen}}
+          where
+            windowsForScreen :: ScreenId -> [Window]
+            windowsForScreen screenId = fromMaybe [] $ Map.lookup screenId pinMap
+
+        insertBottom :: Maybe (Stack a) -> [a] -> Maybe (Stack a)
+        insertBottom Nothing xs = differentiate xs
+        insertBottom (Just s) xs = Just $ s{down = s.down ++ xs}
 
 utilBindings :: [Keybinding]
 utilBindings =
