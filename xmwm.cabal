@@ -57,6 +57,7 @@ library
     XMWM.Spawn
     XMWM.Workspaces
     XMWM.XMobar
+    XMWM.Yeganesh
 
   build-depends:
     , data-default     ==0.8.0.1

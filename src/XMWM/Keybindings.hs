@@ -98,6 +98,7 @@ import XMWM.Sound.Pulse.DBus.Device (
  )
 import XMWM.Sound.Pulse.DBus.Server (runPulseAudioTSession)
 import XMWM.Workspaces (defaultWorkspaces, workspaceFromDmenu)
+import XMWM.Yeganesh (yeganesh)
 
 -- Masks
 
@@ -282,6 +283,7 @@ utilBindings =
   concat
     [ -- Launcher (see `~/.profile` re: $PATH)
       withMask xK_p "$(yeganesh -x)"
+      -- hotkey' xK_p yeganesh
     , -- Lock screen
       withSMask xK_l "slock"
     , withSMask xK_u "slock dm-tool lock"
