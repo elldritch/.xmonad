@@ -8,6 +8,6 @@ haddock-all: True
 haddock-internal: True
 optimization: False
 
-index-state:  hackage.haskell.org 2025-05-10T23:20:35Z
+index-state:  hackage.haskell.org 2025-10-09T20:34:43Z
 
 constraints: xmobar +with_xft +with_utf8 +with_alsa +with_nl80211
