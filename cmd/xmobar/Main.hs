@@ -27,7 +27,7 @@ showBattery = getAny . mconcat <$> mapM isBattery batteryIDs
       exists <- doesFileExist f
       Any
         <$> if exists
-          then (== "Battery\n") <$> readFileBS "/sys/class/power_supply/BAT0/type"
+          then (== "Battery\n") <$> readFileBS f
           else pure False
 
 -- Show if:
