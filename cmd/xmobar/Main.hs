@@ -97,10 +97,11 @@ main = do
   batteryPowered <- showBattery
   xmobar $
     defaultConfig
-      { font = "xft:monospace 11"
+      { -- TODO: Detect HiDPI scaling and use that to pick font
+        font = "xft:monospace 22"
       , bgColor = "black"
       , fgColor = "silver"
-      , position = TopH 30
+      , position = TopH 60
       , commands =
           [ Run StdinReader
           , Run $ Cpu ["-L", "3", "-H", "70", "--normal", "lime", "--high", "red"] 10
@@ -142,28 +143,28 @@ main = do
           , Run Dunst
           ]
             ++ [ Run $
-                Battery
-                  [ "--template"
-                  , "<left>%<acstatus>, <timeleft> left"
-                  , "--Low"
-                  , "40"
-                  , "--High"
-                  , "80"
-                  , "--low"
-                  , "red"
-                  , "--normal"
-                  , "yellow"
-                  , "--high"
-                  , "lime"
-                  , "--"
-                  , "-O"
-                  , " (Charging)"
-                  , "-i"
-                  , " (Charged)"
-                  , "-o"
-                  , ""
-                  ]
-                  60
+                   Battery
+                     [ "--template"
+                     , "<left>%<acstatus>, <timeleft> left"
+                     , "--Low"
+                     , "40"
+                     , "--High"
+                     , "80"
+                     , "--low"
+                     , "red"
+                     , "--normal"
+                     , "yellow"
+                     , "--high"
+                     , "lime"
+                     , "--"
+                     , "-O"
+                     , " (Charging)"
+                     , "-i"
+                     , " (Charged)"
+                     , "-o"
+                     , ""
+                     ]
+                     60
                | batteryPowered
                ]
       , sepChar = "%"
