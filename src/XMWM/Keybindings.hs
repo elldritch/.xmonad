@@ -9,10 +9,11 @@ import Data.Default (def)
 import Data.Map.Strict qualified as Map
 import Data.Set qualified as Set
 import Graphics.X11.ExtraTypes.XF86 (
-  xF86XK_AudioForward,
   xF86XK_AudioLowerVolume,
+  xF86XK_AudioMedia,
   xF86XK_AudioMicMute,
   xF86XK_AudioMute,
+  xF86XK_AudioNext,
   xF86XK_AudioPlay,
   xF86XK_AudioPrev,
   xF86XK_AudioRaiseVolume,
@@ -305,9 +306,9 @@ mediaKeyBindings =
       hotkey xF86XK_MonBrightnessUp "xbacklight -inc 10"
     , hotkey xF86XK_MonBrightnessDown "xbacklight -dec 10"
     , -- Volume control with media keys
-      hotkey xF86XK_AudioMute "amixer sset Master toggle"
-    , hotkey xF86XK_AudioLowerVolume "amixer sset Master 1%-"
-    , hotkey xF86XK_AudioRaiseVolume "amixer sset Master 1%+"
+      hotkey xF86XK_AudioMute volumeToggleMuteSh
+    , hotkey xF86XK_AudioLowerVolume volumeLowerSh
+    , hotkey xF86XK_AudioRaiseVolume volumeRaiseSh
     , -- Microphone control with media keys
       hotkey xF86XK_AudioMicMute "amixer sset Capture toggle"
     ]
@@ -323,11 +324,12 @@ mprisBindings =
     [ -- Select MPRIS players
       hotkeyS' xF86XK_AudioPlay selectPlayer
     , withSMask' xK_Up selectPlayer
+    , hotkey' xF86XK_AudioMedia selectPlayer
     , -- Control MPRIS players
       hotkey' xF86XK_AudioPlay $ player Player.playPause
     , withMask' xK_Up $ player Player.play
     , withMask' xK_Down $ player Player.pause
-    , hotkey' xF86XK_AudioForward $ player Player.next
+    , hotkey' xF86XK_AudioNext $ player Player.next
     , withMask' xK_Right $ player Player.next
     , hotkey' xF86XK_AudioPrev $ player Player.previous
     , withMask' xK_Left $ player Player.previous
@@ -357,11 +359,11 @@ volumeBindings :: [Keybinding]
 volumeBindings =
   concat
     [ -- Toggle mute
-      withMask xK_F9 "amixer sset Master toggle"
+      withMask xK_F9 volumeToggleMuteSh
     , withMask xK_F10 "amixer sset Capture toggle"
     , -- Volume control
-      withMask xK_F11 "amixer sset Master 1%-"
-    , withMask xK_F12 "amixer sset Master 1%+"
+      withMask xK_F11 volumeLowerSh
+    , withMask xK_F12 volumeRaiseSh
     ]
 
 audioDeviceBindings :: [Keybinding]
@@ -424,3 +426,16 @@ selectOption options render setOption = do
   opts <- options
   selected <- dmenu' (toString . render) opts
   setOption selected
+
+-- TODO: Auto-configure Pipewire vs PulseAudio.
+volumeToggleMuteSh :: String
+-- volumeToggleMuteSh = "amixer sset Master toggle"
+volumeToggleMuteSh = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+
+volumeLowerSh :: String
+-- volumeLowerSh = "amixer sset Master 1%-"
+volumeLowerSh = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-"
+
+volumeRaiseSh :: String
+-- volumeRaiseSh = "amixer sset Master 1%+"
+volumeRaiseSh = "wpctl set-volume --limit 1 @DEFAULT_AUDIO_SINK@ 1%+"
