@@ -1,14 +1,14 @@
 cabal-version: 3.0
-name:          xmwm
-synopsis:      A window manager based off of XMonad.
-version:       0.0.1.0
+name: xmwm
+synopsis: A window manager based off of XMonad.
+version: 0.0.1.0
 
 common lang
   build-depends:
-    , base    ==4.18.3.0
-    , relude  ==1.2.1.0
+    base ==4.18.3.0,
+    relude ==1.2.1.0,
 
-  default-language:   GHC2021
+  default-language: GHC2021
   default-extensions:
     Arrows
     DataKinds
@@ -29,15 +29,18 @@ common lang
     TypeFamilies
 
   ghc-options:
-    -Wall -Wincomplete-uni-patterns -Wcompat
-    -Wincomplete-record-updates -Wmissing-home-modules
-    -Wmissing-export-lists -Wredundant-constraints
+    -Wall
+    -Wincomplete-uni-patterns
+    -Wcompat
+    -Wincomplete-record-updates
+    -Wmissing-home-modules
+    -Wmissing-export-lists
+    -Wredundant-constraints
 
 library
-  import:          lang
-  hs-source-dirs:  src
-
-  -- cabal-fmt: expand src
+  import: lang
+  hs-source-dirs: src
+  -- cabal-gild: discover src
   exposed-modules:
     XMWM.Applications.Zoom
     XMWM.Config
@@ -59,44 +62,48 @@ library
     XMWM.XMobar
 
   build-depends:
-    , data-default     ==0.8.0.1
-    , dbus             ==1.4.0
-    , monad-control    ==1.0.3.1
-    , mtl
-    , safe-exceptions  ==0.1.7.4
-    , X11              ==1.10.3
-    , xmonad           ==0.18.0
-    , xmonad-contrib   ==0.18.1
+    X11 ==1.10.3,
+    data-default ==0.8.0.1,
+    dbus ==1.4.0,
+    monad-control ==1.0.3.1,
+    mtl,
+    safe-exceptions ==0.1.7.4,
+    xmonad ==0.18.0,
+    xmonad-contrib ==0.18.1,
 
 test-suite tests
-  import:             lang
-  type:               exitcode-stdio-1.0
-  hs-source-dirs:     test
-  main-is:            Main.hs
-
-  -- cabal-fmt: expand test -Main
-  other-modules:
+  import: lang
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Main.hs
   build-tool-depends: hspec-discover:hspec-discover ==2.10.0.1
   build-depends:
-    , hspec  ==2.10.0.1
-    , xmwm
+    hspec ==2.10.0.1,
+    xmwm,
 
 executable xmonad
-  import:         lang
+  import: lang
   hs-source-dirs: cmd/xmonad
-  main-is:        Main.hs
+  main-is: Main.hs
   build-depends:
-    , xmonad          ==0.18.0
-    , xmonad-contrib  ==0.18.1
-    , xmwm
+    xmonad ==0.18.0,
+    xmonad-contrib ==0.18.1,
+    xmwm,
 
 executable xmobar
-  import:         lang
+  import: lang
   hs-source-dirs: cmd/xmobar
-  main-is:        Main.hs
+  main-is: Main.hs
   build-depends:
-    , directory
-    , process
-    , xmobar     ==0.49
+    directory,
+    process,
+    xmobar ==0.49,
 
-  ghc-options:    -threaded
+  ghc-options: -threaded
+
+executable yeganish
+  import: lang
+  hs-source-dirs: cmd/yeganish
+  main-is: Main.hs
+  build-depends: directory
+  ghc-options: -threaded
