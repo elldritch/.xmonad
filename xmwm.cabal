@@ -110,6 +110,8 @@ executable yeganish
     path ==0.9.6,
     path-io ==1.8.2,
     process,
+    sqlite-simple ==0.4.19.0,
+    time,
     xmwm,
 
   ghc-options: -threaded
