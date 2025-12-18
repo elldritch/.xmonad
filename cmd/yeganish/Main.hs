@@ -22,7 +22,7 @@ data ProgramEntry = ProgramEntry
   , count :: Int
   , lastUsed :: UTCTime
   }
-  deriving (Generic, FromRow, ToRow)
+  deriving (Show, Generic, FromRow, ToRow)
 
 main :: IO ()
 main = do
@@ -41,24 +41,28 @@ main = do
         execute_ db "CREATE TABLE IF NOT EXISTS program (name TEXT NOT NULL UNIQUE, path TEXT NOT NULL, count INTEGER NOT NULL, last_used TEXT NOT NULL)"
         pure db
 
-  -- Read saved program entries and invocation counts from SQLite, sorting by
-  -- frecency. Frecency is like frequency, but also applies a penalty for
-  -- entries that have not been used for a long time.
-  --
-  -- In particular, note how _score_ is calculated in this query. To tune the
-  -- scoring behavior, adjust the penalty decay factor (which must be < 1 in
-  -- order to ensure that elapsed time _reduces_ score) and the scaling on the
-  -- elapsed time (currently at _minutes_ but could be scaled to hours or days).
-  entries <-
-    query_ @ProgramEntry
-      db
-      "SELECT name, path, count, last_used FROM \
-      \ (SELECT name, path, count, last_used, \
-      \  1 + count * POWER(0.95, (UNIXEPOCH('now') - UNIXEPOCH(last_used)) / 60) AS score \
-      \  FROM program ORDER BY score DESC) t"
+  -- Read saved program entries and invocation counts from SQLite.
+  entries <- query_ @ProgramEntry db "SELECT * FROM program"
 
-  -- Present selection to user.
-  selected <- runExceptT $ dmenu' (.name) entries
+  -- Present selection to user, sorting by frecency. Frecency is like frequency,
+  -- but also applies a penalty for entries that have not been used for a long
+  -- time.
+  now <- getCurrentTime
+  let
+    sortedEntries = sortBy (comparing (Down . frecency)) entries
+    -- This decay factor must be less than 1 so it penalizes frequency that is
+    -- old.
+    decay :: Double
+    decay = 0.95
+    toDouble :: (Real a) => a -> Double
+    toDouble = fromRational . toRational
+    -- This is currently scaled to _minutes_, but could be tweaked to be scaled
+    -- otherwise if desired.
+    elapsed :: UTCTime -> Double
+    elapsed from = toDouble $ nominalDiffTimeToSeconds (diffUTCTime now from) / 60
+    frecency :: ProgramEntry -> Double
+    frecency ProgramEntry{count, lastUsed} = 1 + toDouble count * (decay ** elapsed lastUsed)
+  selected <- runExceptT $ dmenu' (.name) sortedEntries
 
   -- If selected, run program.
   selected' <- case selected of
@@ -74,7 +78,6 @@ main = do
     Right bins -> pure bins
 
   -- Update SQLite with new programs and invocation counts.
-  now <- getCurrentTime
   let
     -- First, look up each existing entry in the scanned map by name, plucking
     -- entries out of the scanned map on examination. We use this to update any
