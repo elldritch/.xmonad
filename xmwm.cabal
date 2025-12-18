@@ -105,5 +105,11 @@ executable yeganish
   import: lang
   hs-source-dirs: cmd/yeganish
   main-is: Main.hs
-  build-depends: directory
+  build-depends:
+    mtl,
+    path ==0.9.6,
+    path-io ==1.8.2,
+    process,
+    xmwm,
+
   ghc-options: -threaded
