@@ -283,7 +283,7 @@ utilBindings =
   concat
     [ -- Launcher (see `~/.profile` re: $PATH)
       -- TODO: Ship a portable version of yeganesh that builds with XMWM.
-      withMask xK_p "$(yegonesh -x)"
+      withMask xK_p "yeganish"
     , -- Lock screen
       withSMask xK_l "slock"
     , withSMask xK_u "slock dm-tool lock"
