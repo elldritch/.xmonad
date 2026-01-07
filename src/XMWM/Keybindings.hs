@@ -282,11 +282,10 @@ utilBindings :: [Keybinding]
 utilBindings =
   concat
     [ -- Launcher (see `~/.profile` re: $PATH)
-      -- TODO: Ship a portable version of yeganesh that builds with XMWM.
       withMask xK_p "yeganish"
     , -- Lock screen
-      withSMask xK_l "slock"
-    , withSMask xK_u "slock dm-tool lock"
+      withSMask xK_l "slock & (sleep 1 && systemctl suspend)"
+    , withSMask xK_u "slock dm-tool lock & (sleep 1 && systemctl suspend)"
     , -- Forcibly xkill a clicked window
       withSMask xK_c "xkill"
     , -- Screenshots
