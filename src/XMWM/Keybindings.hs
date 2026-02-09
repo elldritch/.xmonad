@@ -284,8 +284,8 @@ utilBindings =
     [ -- Launcher (see `~/.profile` re: $PATH)
       withMask xK_p "yeganish"
     , -- Lock screen
-      withSMask xK_l "slock & (sleep 1 && systemctl suspend)"
-    , withSMask xK_u "slock dm-tool lock & (sleep 1 && systemctl suspend)"
+      withSMask xK_l "slock"
+    , withSMask xK_u "slock & (sleep 1 && systemctl suspend)"
     , -- Forcibly xkill a clicked window
       withSMask xK_c "xkill"
     , -- Screenshots
